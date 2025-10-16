@@ -1,11 +1,47 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Adrian Robinson</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-        <h1>Adrian</h1>
-        <p>This is my lexicon!</p>
-    </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lexicon</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav>
+    <a href="#" id="tab1" class="active">Lexicon 1</a>
+    <a href="#" id="tab2">Lexicon 2</a>
+  </nav>
+
+  <main id="content">
+    <h1>Lexicon 1</h1>
+    <p>This is the first lexicon. Replace this text with your entries.</p>
+  </main>
+
+  <script>
+    const tab1 = document.getElementById('tab1');
+    const tab2 = document.getElementById('tab2');
+    const content = document.getElementById('content');
+
+    const lexicons = {
+      1: `
+        <h1>Lexicon 1</h1>
+        <p>This is the first lexicon. Replace this text with your entries.</p>
+      `,
+      2: `
+        <h1>Lexicon 2</h1>
+        <p>This is the second lexicon. Replace this text with your entries.</p>
+      `
+    };
+
+    function activateTab(tabNumber) {
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById('tab' + tabNumber).classList.add('active');
+      content.innerHTML = lexicons[tabNumber];
+    }
+
+    tab1.addEventListener('click', () => activateTab(1));
+    tab2.addEventListener('click', () => activateTab(2));
+  </script>
+</body>
 </html>
+
