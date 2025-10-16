@@ -7,40 +7,68 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <nav>
-    <a href="#" id="tab1" class="active">Lexicon 1</a>
-    <a href="#" id="tab2">Lexicon 2</a>
-  </nav>
-
+  <nav id="navbar"></nav>
   <main id="content">
-    <h1>Lexicon 1</h1>
-    <p>This is the first lexicon. Replace this text with your entries.</p>
+    <h1>Loading...</h1>
+    <p>Please wait while the lexicon loads.</p>
   </main>
 
   <script>
-    const tab1 = document.getElementById('tab1');
-    const tab2 = document.getElementById('tab2');
-    const content = document.getElementById('content');
+    const lexiconFiles = [
+      "lexicons/removing-commons.md",
+      "lexicons/second-lexicon.md"
+    ];
 
-    const lexicons = {
-      1: `
-        <h1>Lexicon 1</h1>
-        <p>This is the first lexicon. Replace this text with your entries.</p>
-      `,
-      2: `
-        <h1>Lexicon 2</h1>
-        <p>This is the second lexicon. Replace this text with your entries.</p>
-      `
-    };
+    const navbar = document.getElementById("navbar");
+    const content = document.getElementById("content");
 
-    function activateTab(tabNumber) {
-      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-      document.getElementById('tab' + tabNumber).classList.add('active');
-      content.innerHTML = lexicons[tabNumber];
+    async function loadLexicon(file) {
+      const response = await fetch(file);
+      const text = await response.text();
+
+      // Split into lines and extract the first non-empty one as title
+      const lines = text.split("\n");
+      const titleLine = lines.find(line => line.trim().startsWith("#"));
+      const title = titleLine ? titleLine.replace(/^#\s*/, "").trim() : "Untitled";
+      const body = text.replace(titleLine || "", "").trim();
+
+      // Update content and document title
+      document.title = title;
+      content.innerHTML = `<h1>${title}</h1><pre>${body}</pre>`;
+
+      // Highlight active tab
+      document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
+      const active = document.querySelector(`nav a[data-file='${file}']`);
+      if (active) active.classList.add("active");
+
+      // Remember last opened lexicon
+      localStorage.setItem("lastLexicon", file);
     }
 
-    tab1.addEventListener('click', () => activateTab(1));
-    tab2.addEventListener('click', () => activateTab(2));
+    async function setupNavbar() {
+      for (const file of lexiconFiles) {
+        const response = await fetch(file);
+        const text = await response.text();
+        const firstLine = text.split("\n").find(line => line.trim().startsWith("#"));
+        const title = firstLine ? firstLine.replace(/^#\s*/, "").trim() : "Untitled";
+
+        const link = document.createElement("a");
+        link.href = "#";
+        link.textContent = title;
+        link.dataset.file = file;
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          loadLexicon(file);
+        });
+        navbar.appendChild(link);
+      }
+
+      // Restore last opened lexicon, or default to the first
+      const last = localStorage.getItem("lastLexicon");
+      await loadLexicon(last && lexiconFiles.includes(last) ? last : lexiconFiles[0]);
+    }
+
+    setupNavbar();
   </script>
 </body>
 </html>
